@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: logistics-postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres  # Replace with your actual password
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - pgdata:/var/lib/postgresql/data
+
+# THIS IS THE MISSING PART:
+volumes:
+  pgdata:

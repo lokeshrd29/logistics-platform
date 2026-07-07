@@ -1,5 +1,7 @@
 package com.lokesh.logistics.auth_service.controller;
 
+import com.lokesh.logistics.auth_service.dto.LoginRequest;
+import com.lokesh.logistics.auth_service.dto.LoginResponse;
 import com.lokesh.logistics.auth_service.dto.RegisterRequest;
 import com.lokesh.logistics.auth_service.dto.RegisterResponse;
 import com.lokesh.logistics.auth_service.service.AuthService;
@@ -22,6 +24,12 @@ public class AuthController {
     public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest request)
     {
         return ResponseEntity.ok(authService.register(request));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request)
+    {
+        return ResponseEntity.ok(authService.login(request));
     }
 
 }

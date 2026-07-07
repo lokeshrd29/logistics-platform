@@ -1,21 +1,22 @@
 package com.lokesh.logistics.auth_service.service.impl;
 
 import com.lokesh.logistics.auth_service.common.enums.AuthProvider;
-import com.lokesh.logistics.auth_service.dto.RegisterRequest;
-import com.lokesh.logistics.auth_service.dto.RegisterResponse;
+import com.lokesh.logistics.auth_service.dto.*;
 import com.lokesh.logistics.auth_service.entity.Role;
 import com.lokesh.logistics.auth_service.entity.User;
-import com.lokesh.logistics.auth_service.exception.EmailAlreadyExistsException;
-import com.lokesh.logistics.auth_service.exception.PhoneAlreadyExistsException;
-import com.lokesh.logistics.auth_service.exception.UsernameAlreadyExistsException;
+import com.lokesh.logistics.auth_service.exception.*;
 import com.lokesh.logistics.auth_service.repository.RoleRepository;
 import com.lokesh.logistics.auth_service.repository.UserRepository;
+import com.lokesh.logistics.auth_service.security.JwtService;
 import com.lokesh.logistics.auth_service.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +25,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final JwtService jwtService ;
 
     @Override
     public RegisterResponse register(RegisterRequest request) {
@@ -59,6 +61,48 @@ public class AuthServiceImpl implements AuthService {
                 .email(savedUser.getEmail())
                 .phone(savedUser.getPhone())
                 .message("User registered successfully")
+                .build();
+    }
+
+    @Override
+    public LoginResponse login(LoginRequest loginRequest)
+    {
+        User user = userRepository.findUserByUsername(loginRequest.getUserName())
+                .orElseThrow(() ->
+                        new UserNotFoundException(loginRequest.getUserName()));
+
+        if(!passwordEncoder.matches(loginRequest.getPassword(),user.getPassword())) {
+            throw new InvalidCredentialsException("Invalid Credentials");
+        }
+
+        if (!user.isEnabled()) {
+            throw new DisabledUserFoundExpection("Account is disabled");
+        }
+
+        String accessToken = jwtService.generateAccessToken(user);
+
+        String refreshToken = jwtService.generateRefreshToken(user);
+
+        return LoginResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .tokenType("Bearer")
+                .expiresIn(jwtService.getAccessTokenExpiration())
+                .user(
+                        UserResponse.builder()
+                                .username(user.getUsername())
+                                .email(user.getEmail())
+                                .phone(user.getPhone())
+                                .enabled(user.isEnabled())
+                                .emailVerified(user.isEmailVerified())
+                                .roles(
+                                        user.getRoles()
+                                                .stream()
+                                                .map(Role::getRole)
+                                                .collect(Collectors.toSet())
+                                )
+                                .build()
+                )
                 .build();
     }
 }

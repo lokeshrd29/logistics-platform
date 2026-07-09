@@ -1,9 +1,6 @@
 package com.lokesh.logistics.auth_service.service;
 
-import com.lokesh.logistics.auth_service.dto.LoginRequest;
-import com.lokesh.logistics.auth_service.dto.LoginResponse;
-import com.lokesh.logistics.auth_service.dto.RegisterRequest;
-import com.lokesh.logistics.auth_service.dto.RegisterResponse;
+import com.lokesh.logistics.auth_service.dto.*;
 
 public interface AuthService {
 
@@ -11,4 +8,5 @@ public interface AuthService {
 
     LoginResponse login(LoginRequest login);
 
+    UserResponse getCurrentUser();
 }

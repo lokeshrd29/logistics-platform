@@ -1,17 +1,11 @@
 package com.lokesh.logistics.auth_service.controller;
 
-import com.lokesh.logistics.auth_service.dto.LoginRequest;
-import com.lokesh.logistics.auth_service.dto.LoginResponse;
-import com.lokesh.logistics.auth_service.dto.RegisterRequest;
-import com.lokesh.logistics.auth_service.dto.RegisterResponse;
+import com.lokesh.logistics.auth_service.dto.*;
 import com.lokesh.logistics.auth_service.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -30,6 +24,12 @@ public class AuthController {
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request)
     {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> getCurrentUser() {
+
+        return ResponseEntity.ok(authService.getCurrentUser());
     }
 
 }

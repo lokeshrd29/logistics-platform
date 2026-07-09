@@ -12,9 +12,9 @@ import com.lokesh.logistics.auth_service.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -90,6 +90,7 @@ public class AuthServiceImpl implements AuthService {
                 .expiresIn(jwtService.getAccessTokenExpiration())
                 .user(
                         UserResponse.builder()
+                                .id(user.getId())
                                 .username(user.getUsername())
                                 .email(user.getEmail())
                                 .phone(user.getPhone())
@@ -102,6 +103,34 @@ public class AuthServiceImpl implements AuthService {
                                                 .collect(Collectors.toSet())
                                 )
                                 .build()
+                )
+                .build();
+    }
+
+    @Override
+    public UserResponse getCurrentUser() {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String username = authentication.getName();
+
+        User user = userRepository.getUserByUsername(username)
+                .orElseThrow(() ->
+                        new UserNotFoundException("User not found"));
+
+        return UserResponse.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .enabled(user.isEnabled())
+                .emailVerified(user.isEmailVerified())
+                .roles(
+                        user.getRoles()
+                                .stream()
+                                .map(Role::getRole)
+                                .collect(Collectors.toSet())
                 )
                 .build();
     }

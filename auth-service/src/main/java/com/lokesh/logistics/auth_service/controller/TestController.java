@@ -1,0 +1,30 @@
+package com.lokesh.logistics.auth_service.controller;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api")
+public class TestController {
+    @GetMapping
+    public String hello() {
+        return "JWT Filter Working";
+    }
+
+    @GetMapping("/admin")
+    public String test() {
+        return "Hello Admin";
+    }
+
+    @GetMapping("/customer")
+    public String testCustomer() {
+        return "Hello Customer";
+    }
+
+    @GetMapping("/agent")
+    public String Agent() {
+        return "Hello Agent";
+    }
+
+}

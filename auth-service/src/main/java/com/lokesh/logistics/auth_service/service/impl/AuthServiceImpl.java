@@ -9,7 +9,10 @@ import com.lokesh.logistics.auth_service.repository.RoleRepository;
 import com.lokesh.logistics.auth_service.repository.UserRepository;
 import com.lokesh.logistics.auth_service.security.JwtService;
 import com.lokesh.logistics.auth_service.service.AuthService;
+import com.lokesh.logistics.auth_service.service.CustomerUserDetailsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.Authentication;
@@ -132,6 +135,30 @@ public class AuthServiceImpl implements AuthService {
                                 .map(Role::getRole)
                                 .collect(Collectors.toSet())
                 )
+                .build();
+    }
+
+    @Override
+    public RefreshTokenResponse refreshToken(RefreshTokenRequest request)
+    {
+        String refreshToken = request.getRefreshToken();
+
+        String username = jwtService.extractUsername(refreshToken);
+
+        User user = userRepository.getUserByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException(username));
+
+        if (!jwtService.isTokenValid(refreshToken, user)) {
+            throw new RuntimeException("Invalid Refresh Token");
+        }
+
+        String newAccessToken =
+                jwtService.generateAccessToken(user);
+
+        return RefreshTokenResponse.builder()
+                .accessToken(newAccessToken)
+                .tokenType("Bearer")
+                .expiresIn(jwtService.getAccessTokenExpiration())
                 .build();
     }
 }

@@ -32,4 +32,13 @@ public class AuthController {
         return ResponseEntity.ok(authService.getCurrentUser());
     }
 
+    @PostMapping("/refresh")
+    public ResponseEntity<RefreshTokenResponse> refreshToken(
+            @RequestBody RefreshTokenRequest refreshTokenrequest) {
+
+        return ResponseEntity.ok(
+                authService.refreshToken(refreshTokenrequest)
+        );
+    }
+
 }

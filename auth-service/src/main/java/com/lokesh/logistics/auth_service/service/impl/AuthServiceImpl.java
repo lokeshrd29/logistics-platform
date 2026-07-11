@@ -2,9 +2,11 @@ package com.lokesh.logistics.auth_service.service.impl;
 
 import com.lokesh.logistics.auth_service.common.enums.AuthProvider;
 import com.lokesh.logistics.auth_service.dto.*;
+import com.lokesh.logistics.auth_service.entity.RefreshToken;
 import com.lokesh.logistics.auth_service.entity.Role;
 import com.lokesh.logistics.auth_service.entity.User;
 import com.lokesh.logistics.auth_service.exception.*;
+import com.lokesh.logistics.auth_service.repository.RefreshTokenRepository;
 import com.lokesh.logistics.auth_service.repository.RoleRepository;
 import com.lokesh.logistics.auth_service.repository.UserRepository;
 import com.lokesh.logistics.auth_service.security.JwtService;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -29,6 +32,7 @@ public class AuthServiceImpl implements AuthService {
     private final RoleRepository roleRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtService jwtService ;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Override
     public RegisterResponse register(RegisterRequest request) {
@@ -85,6 +89,16 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = jwtService.generateAccessToken(user);
 
         String refreshToken = jwtService.generateRefreshToken(user);
+
+        RefreshToken token = RefreshToken.builder()
+                .token(refreshToken)
+                .expiryDate(
+                        LocalDateTime.now().plusDays(7)
+                )
+                .user(user)
+                .build();
+
+        refreshTokenRepository.save(token);
 
         return LoginResponse.builder()
                 .accessToken(accessToken)
@@ -152,6 +166,11 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("Invalid Refresh Token");
         }
 
+        RefreshToken storedToken = refreshTokenRepository
+                .findByToken(request.getRefreshToken())
+                .orElseThrow(() ->
+                        new RuntimeException("Refresh token not found"));
+
         String newAccessToken =
                 jwtService.generateAccessToken(user);
 
@@ -160,5 +179,13 @@ public class AuthServiceImpl implements AuthService {
                 .tokenType("Bearer")
                 .expiresIn(jwtService.getAccessTokenExpiration())
                 .build();
+    }
+
+    @Override
+    public void logout(LogoutRequest request) {
+
+        refreshTokenRepository.deleteByToken(
+                request.getRefreshToken()
+        );
     }
 }

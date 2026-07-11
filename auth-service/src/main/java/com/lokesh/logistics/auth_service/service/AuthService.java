@@ -11,4 +11,6 @@ public interface AuthService {
     UserResponse getCurrentUser();
 
     RefreshTokenResponse refreshToken(RefreshTokenRequest refreshTokenRequest);
+
+    void logout(LogoutRequest request);
 }

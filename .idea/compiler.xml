@@ -3,7 +3,7 @@
   <component name="CompilerConfiguration">
     <annotationProcessing>
       <profile default="true" name="Default" enabled="true" />
-      <profile name="Annotation profile for auth-service" enabled="true">
+      <profile name="Annotation profile for discovery-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -14,6 +14,7 @@
         <module name="shipment-service" />
         <module name="auth-service" />
         <module name="warehouse-service" />
+        <module name="discovery-service" />
         <module name="tracking-service" />
       </profile>
     </annotationProcessing>
@@ -25,6 +26,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="api-gateway" options="-parameters" />
       <module name="auth-service" options="-parameters" />
+      <module name="discovery-service" options="-parameters" />
       <module name="shipment-service" options="-parameters" />
       <module name="tracking-service" options="-parameters" />
       <module name="warehouse-service" options="-parameters" />
